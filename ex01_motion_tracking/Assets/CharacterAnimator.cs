@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Playables;
 using UnityEngine;
 
 public class CharacterAnimator : MonoBehaviour
@@ -73,7 +74,14 @@ public class CharacterAnimator : MonoBehaviour
     GameObject CreateCylinderBetweenPoints(Vector3 p1, Vector3 p2, float diameter)
     {
         // Your code here
-        return null;
+        GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        Matrix4x4 t = MatrixUtils.Translate(p1+(p2-p1)/2);
+        Vector3 direction = p2 - p1;
+        Matrix4x4 r = RotateTowardsVector(direction);
+        float height = Vector3.Distance(p1, p2) / 2;
+        Matrix4x4 s = MatrixUtils.Scale(new Vector3(diameter, height, diameter));
+        MatrixUtils.ApplyTransform(cylinder, t * r * s);
+        return cylinder;
     }
 
     // Creates a GameObject representing a given BVHJoint and recursively creates GameObjects for it's child joints
@@ -87,9 +95,12 @@ public class CharacterAnimator : MonoBehaviour
         Matrix4x4 s = MatrixUtils.Scale(scalingVec);
         Matrix4x4 t = MatrixUtils.Translate(parentPosition + joint.offset);
         MatrixUtils.ApplyTransform(sphere, t * s);
+
         foreach (BVHJoint childJoint in joint.children)
         {
-            CreateJoint(childJoint, sphere.transform.position);
+            GameObject childSphere = CreateJoint(childJoint, sphere.transform.position);
+            CreateCylinderBetweenPoints(sphere.transform.position, childSphere.transform.position, 1);
+
         }
 
         return sphere;
