@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\school_folders\67629_cg\computer_graphics_2020_huji\ex01_motion_tracking" t="IncludeRecursive">
+      <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
+      <e p="Assets" t="Include">
+        <e p="BVH" t="Include">
+          <e p="Balance.bvh.txt" t="Include" />
+          <e p="Cheer.bvh.txt" t="Include" />
+          <e p="Dance.bvh.txt" t="Include" />
+          <e p="Walking.bvh.txt" t="Include" />
+          <e p="Yoga.bvh.txt" t="Include" />
+        </e>
+        <e p="BVHParser.cs" t="Include" />
+        <e p="CharacterAnimator.cs" t="Include" />
+        <e p="MatrixUtils.cs" t="Include" />
+      </e>
+      <e p="ex01_motion_tracking.sln" t="IncludeFlat" />
+      <e p="obj" t="ExcludeRecursive" />
+      <e p="Packages" t="ExcludeRecursive" />
+      <e p="Temp\bin" t="ExcludeRecursive" />
+    </e>
+    <e p="C:\Users\alon\.Rider2019.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\alon\.Rider2019.2\system\resharper-host\local\Transient\ReSharperHost\v192\SolutionCaches\_ex01_motion_tracking.1189534369.00" t="ExcludeRecursive" />
+  </component>
+</project>

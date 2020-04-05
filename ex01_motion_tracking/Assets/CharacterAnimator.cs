@@ -16,6 +16,7 @@ public class CharacterAnimator : MonoBehaviour
     {
         BVHParser parser = new BVHParser();
         data = parser.Parse(BVHFile);
+        CreateJoint(data.rootJoint, Vector3.zero);
     }
 
     // Returns a Matrix4x4 representing a rotation aligning the up direction of an object with the given v
@@ -36,8 +37,21 @@ public class CharacterAnimator : MonoBehaviour
     GameObject CreateJoint(BVHJoint joint, Vector3 parentPosition)
     {
         // Your code here
-        return null;
+        joint.gameObject = new GameObject(joint.name);
+        GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        sphere.transform.parent = joint.gameObject.transform;
+        Vector3 scalingVec = (joint.name == "Head") ? new Vector3(8, 8, 8) : new Vector3(2, 2, 2);
+        Matrix4x4 s = MatrixUtils.Scale(scalingVec);
+        Matrix4x4 t = MatrixUtils.Translate(parentPosition + joint.offset);
+        MatrixUtils.ApplyTransform(sphere, t * s);
+        foreach (BVHJoint childJoint in joint.children)
+        {
+            CreateJoint(childJoint, sphere.transform.position);
+        }
+
+        return sphere;
     }
+
 
     // Transforms BVHJoint according to the keyframe channel data, and recursively transforms its children
     private void TransformJoint(BVHJoint joint, Matrix4x4 parentTransform, float[] keyframe)
