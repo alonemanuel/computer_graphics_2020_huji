@@ -13,6 +13,7 @@ public class CharacterAnimator : MonoBehaviour
     private int currFrame = 0; // Current frame of the animation
     private float startTime;
     private float currTime;
+    private float totalAnimationTime;
 
     // Start is called before the first frame update
     void Start()
@@ -21,6 +22,7 @@ public class CharacterAnimator : MonoBehaviour
         data = parser.Parse(BVHFile);
         CreateJoint(data.rootJoint, Vector3.zero);
         startTime = Time.time;
+        totalAnimationTime = data.frameLength * data.numFrames;
     }
 
     private void TestRotateTowardsVector()
@@ -100,9 +102,9 @@ public class CharacterAnimator : MonoBehaviour
         foreach (BVHJoint childJoint in joint.children)
         {
             GameObject childSphere = CreateJoint(childJoint, sphere.transform.position);
-            GameObject cylinder = CreateCylinderBetweenPoints(sphere.transform.position, childSphere.transform.position, 1);
+            GameObject cylinder =
+                CreateCylinderBetweenPoints(sphere.transform.position, childSphere.transform.position, 1);
             cylinder.transform.parent = joint.gameObject.transform;
-
         }
 
         return sphere;
@@ -124,7 +126,7 @@ public class CharacterAnimator : MonoBehaviour
         MatrixUtils.ApplyTransform(joint.gameObject, globalTransform);
 
         foreach (BVHJoint childJoint in joint.children)
-            
+
         {
             TransformJoint(childJoint, globalTransform, keyframe);
         }
@@ -136,9 +138,13 @@ public class CharacterAnimator : MonoBehaviour
         // Your code here
         if (animate)
         {
-            currTime = Time.time - startTime;
+            currTime = (Time.time - startTime)%totalAnimationTime;
+            Debug.Log("currTime is:");
+            Debug.Log(currTime);
             currFrame = (int) (currTime / data.frameLength);
             currFrame = (currFrame > data.numFrames) ? 0 : currFrame;
+            Debug.Log("currFrame is:");
+            Debug.Log(currFrame);
             TransformJoint(data.rootJoint, Matrix4x4.identity, data.keyframes[currFrame]);
         }
     }
