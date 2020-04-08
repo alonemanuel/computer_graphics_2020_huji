@@ -93,15 +93,16 @@ public class CharacterAnimator : MonoBehaviour
         // Your code here
         joint.gameObject = new GameObject(joint.name);
         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        sphere.transform.parent = joint.gameObject.transform;
         Vector3 scalingVec = (joint.name == "Head") ? new Vector3(8, 8, 8) : new Vector3(2, 2, 2);
         Matrix4x4 s = MatrixUtils.Scale(scalingVec);
         Matrix4x4 t = MatrixUtils.Translate(parentPosition + joint.offset);
-        MatrixUtils.ApplyTransform(sphere, t * s);
+        sphere.gameObject.transform.parent = joint.gameObject.transform;
+        MatrixUtils.ApplyTransform(joint.gameObject, t*s);
+//        MatrixUtils.ApplyTransform(sphere, s);
 
         foreach (BVHJoint childJoint in joint.children)
         {
-            GameObject childSphere = CreateJoint(childJoint, sphere.transform.position);
+            GameObject childSphere = CreateJoint(childJoint, joint.gameObject.transform.position);
             GameObject cylinder =
                 CreateCylinderBetweenPoints(sphere.transform.position, childSphere.transform.position, 1);
             cylinder.transform.parent = joint.gameObject.transform;
@@ -114,19 +115,25 @@ public class CharacterAnimator : MonoBehaviour
     // Transforms BVHJoint according to the keyframe channel data, and recursively transforms its children
     private void TransformJoint(BVHJoint joint, Matrix4x4 parentTransform, float[] keyframe)
     {
+        Matrix4x4 localRMatrix = Matrix4x4.identity;
         // Your code here
+        Debug.Log(("trasnfoming joint: {0} and keyframe: ", joint.name));
+        if (!joint.isEndSite)
+        {
+            Matrix4x4[] rMatrices = new Matrix4x4[3];
+            rMatrices[joint.rotationOrder.x] = MatrixUtils.RotateX(keyframe[joint.rotationChannels.x]);
+            rMatrices[joint.rotationOrder.y] = MatrixUtils.RotateY(keyframe[joint.rotationChannels.y]);
+            rMatrices[joint.rotationOrder.z] = MatrixUtils.RotateZ(keyframe[joint.rotationChannels.z]);
+            localRMatrix = rMatrices[0] * rMatrices[1] * rMatrices[2];
+        }
 
-        Matrix4x4[] rMatrices = new Matrix4x4[3];
-        rMatrices[joint.rotationOrder.x] = MatrixUtils.RotateX(keyframe[joint.rotationChannels.x]);
-        rMatrices[joint.rotationOrder.y] = MatrixUtils.RotateY(keyframe[joint.rotationChannels.y]);
-        rMatrices[joint.rotationOrder.z] = MatrixUtils.RotateZ(keyframe[joint.rotationChannels.z]);
-        Matrix4x4 localRMatrix = rMatrices[0] * rMatrices[1] * rMatrices[2];
+        Matrix4x4 localTMatrix = MatrixUtils.Translate(joint.offset);
+        Matrix4x4 localTRS = localTMatrix * localRMatrix;
 
-        Matrix4x4 globalTransform = parentTransform * localRMatrix;
+        Matrix4x4 globalTransform = parentTransform * localTRS;
         MatrixUtils.ApplyTransform(joint.gameObject, globalTransform);
 
         foreach (BVHJoint childJoint in joint.children)
-
         {
             TransformJoint(childJoint, globalTransform, keyframe);
         }
@@ -138,9 +145,10 @@ public class CharacterAnimator : MonoBehaviour
         // Your code here
         if (animate)
         {
-            currTime = (Time.time - startTime)%totalAnimationTime;
+            currTime = (Time.time - startTime) % totalAnimationTime;
             Debug.Log("currTime is:");
             Debug.Log(currTime);
+            currFrame = currFrame + 1;
             currFrame = (int) (currTime / data.frameLength);
             currFrame = (currFrame > data.numFrames) ? 0 : currFrame;
             Debug.Log("currFrame is:");
