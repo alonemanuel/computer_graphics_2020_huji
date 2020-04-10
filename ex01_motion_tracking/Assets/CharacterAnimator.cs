@@ -92,9 +92,10 @@ public class CharacterAnimator : MonoBehaviour
         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         Vector3 scalingVec = (joint.name == "Head") ? new Vector3(8, 8, 8) : new Vector3(2, 2, 2);
         Matrix4x4 s = MatrixUtils.Scale(scalingVec);
+        MatrixUtils.ApplyTransform(sphere, s);
         Matrix4x4 t = MatrixUtils.Translate(parentPosition + joint.offset);
         sphere.gameObject.transform.parent = joint.gameObject.transform;
-        MatrixUtils.ApplyTransform(joint.gameObject, t*s);
+        MatrixUtils.ApplyTransform(joint.gameObject, t);
 
         foreach (BVHJoint childJoint in joint.children)
         {
