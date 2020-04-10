@@ -88,7 +88,6 @@ public class CharacterAnimator : MonoBehaviour
     // Creates a GameObject representing a given BVHJoint and recursively creates GameObjects for it's child joints
     GameObject CreateJoint(BVHJoint joint, Vector3 parentPosition)
     {
-        // Your code here
         joint.gameObject = new GameObject(joint.name);
         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         Vector3 scalingVec = (joint.name == "Head") ? new Vector3(8, 8, 8) : new Vector3(2, 2, 2);
@@ -96,17 +95,16 @@ public class CharacterAnimator : MonoBehaviour
         Matrix4x4 t = MatrixUtils.Translate(parentPosition + joint.offset);
         sphere.gameObject.transform.parent = joint.gameObject.transform;
         MatrixUtils.ApplyTransform(joint.gameObject, t*s);
-//        MatrixUtils.ApplyTransform(sphere, s);
 
         foreach (BVHJoint childJoint in joint.children)
         {
-            GameObject childSphere = CreateJoint(childJoint, joint.gameObject.transform.position);
+            GameObject createdChildJoint = CreateJoint(childJoint, joint.gameObject.transform.position);
             GameObject cylinder =
-                CreateCylinderBetweenPoints(sphere.transform.position, childSphere.transform.position, 1);
+                CreateCylinderBetweenPoints(sphere.transform.position, createdChildJoint.transform.position, 1);
             cylinder.transform.parent = joint.gameObject.transform;
         }
 
-        return sphere;
+        return joint.gameObject;
     }
 
 
@@ -123,7 +121,7 @@ public class CharacterAnimator : MonoBehaviour
             localRMatrix = rMatrices[0] * rMatrices[1] * rMatrices[2];
         }
 
-        Matrix4x4 localTMatrix = MatrixUtils.Translate(joint.offset/2);
+        Matrix4x4 localTMatrix = MatrixUtils.Translate(joint.offset);
         Matrix4x4 localTRS = localTMatrix * localRMatrix;
 
         Matrix4x4 globalTransform = parentTransform * localTRS;
