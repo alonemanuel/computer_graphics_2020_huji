@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Playables;
@@ -13,7 +13,6 @@ public class CharacterAnimator : MonoBehaviour
     private int currFrame = 0; // Current frame of the animation
     private float startTime;
     private float currTime;
-    private float totalAnimationTime;
 
     // Start is called before the first frame update
     void Start()
@@ -22,7 +21,6 @@ public class CharacterAnimator : MonoBehaviour
         data = parser.Parse(BVHFile);
         CreateJoint(data.rootJoint, Vector3.zero);
         startTime = Time.time;
-        totalAnimationTime = data.frameLength * data.numFrames;
     }
 
     private void TestRotateTowardsVector()
@@ -116,8 +114,6 @@ public class CharacterAnimator : MonoBehaviour
     private void TransformJoint(BVHJoint joint, Matrix4x4 parentTransform, float[] keyframe)
     {
         Matrix4x4 localRMatrix = Matrix4x4.identity;
-        // Your code here
-        Debug.Log(("trasnfoming joint: {0} and keyframe: ", joint.name));
         if (!joint.isEndSite)
         {
             Matrix4x4[] rMatrices = new Matrix4x4[3];
@@ -127,7 +123,7 @@ public class CharacterAnimator : MonoBehaviour
             localRMatrix = rMatrices[0] * rMatrices[1] * rMatrices[2];
         }
 
-        Matrix4x4 localTMatrix = MatrixUtils.Translate(joint.offset);
+        Matrix4x4 localTMatrix = MatrixUtils.Translate(joint.offset/2);
         Matrix4x4 localTRS = localTMatrix * localRMatrix;
 
         Matrix4x4 globalTransform = parentTransform * localTRS;
@@ -142,17 +138,10 @@ public class CharacterAnimator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Your code here
         if (animate)
         {
-            currTime = (Time.time - startTime) % totalAnimationTime;
-            Debug.Log("currTime is:");
-            Debug.Log(currTime);
-            currFrame = currFrame + 1;
-            currFrame = (int) (currTime / data.frameLength);
-            currFrame = (currFrame > data.numFrames) ? 0 : currFrame;
-            Debug.Log("currFrame is:");
-            Debug.Log(currFrame);
+            currTime = (Time.time - startTime);
+            currFrame = (int) (currTime / data.frameLength) % data.numFrames;
             TransformJoint(data.rootJoint, Matrix4x4.identity, data.keyframes[currFrame]);
         }
     }
