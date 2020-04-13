@@ -141,7 +141,13 @@ public class CharacterAnimator : MonoBehaviour
         {
             currTime = (Time.time - startTime);
             currFrame = (int) (currTime / data.frameLength) % data.numFrames;
-            TransformJoint(data.rootJoint, Matrix4x4.identity, data.keyframes[currFrame]);
+            float[] currKeyFrame = data.keyframes[currFrame];
+            Vector3 positionVector = new Vector3();
+            positionVector.x = currKeyFrame[data.rootJoint.positionChannels.x];
+            positionVector.y = currKeyFrame[data.rootJoint.positionChannels.y];
+            positionVector.z = currKeyFrame[data.rootJoint.positionChannels.z];
+            Matrix4x4 positionRoot = MatrixUtils.Translate(positionVector);
+            TransformJoint(data.rootJoint, positionRoot, currKeyFrame);
         }
     }
 }
