@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Playables;
@@ -10,6 +10,7 @@ public class CharacterAnimator : MonoBehaviour
     public bool animate; // Indicates whether or not the animation should be running
 
     private BVHData data; // BVH data of the BVHFile will be loaded here
+    private int prevFrame = 0;
     private int currFrame = 0; // Current frame of the animation
     private float startTime;
     private float currTime;
@@ -140,14 +141,18 @@ public class CharacterAnimator : MonoBehaviour
         if (animate)
         {
             currTime = (Time.time - startTime);
+            prevFrame = currFrame;
             currFrame = (int) (currTime / data.frameLength) % data.numFrames;
-            float[] currKeyFrame = data.keyframes[currFrame];
-            Vector3 positionVector = new Vector3();
-            positionVector.x = currKeyFrame[data.rootJoint.positionChannels.x];
-            positionVector.y = currKeyFrame[data.rootJoint.positionChannels.y];
-            positionVector.z = currKeyFrame[data.rootJoint.positionChannels.z];
-            Matrix4x4 positionRoot = MatrixUtils.Translate(positionVector);
-            TransformJoint(data.rootJoint, positionRoot, currKeyFrame);
+            if (prevFrame != currFrame)
+            {
+                float[] currKeyFrame = data.keyframes[currFrame];
+                Vector3 positionVector = new Vector3();
+                positionVector.x = currKeyFrame[data.rootJoint.positionChannels.x];
+                positionVector.y = currKeyFrame[data.rootJoint.positionChannels.y];
+                positionVector.z = currKeyFrame[data.rootJoint.positionChannels.z];
+                Matrix4x4 positionRoot = MatrixUtils.Translate(positionVector);
+                TransformJoint(data.rootJoint, positionRoot, currKeyFrame);
+            }
         }
     }
 }
