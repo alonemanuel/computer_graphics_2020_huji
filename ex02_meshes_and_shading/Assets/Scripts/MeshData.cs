@@ -93,6 +93,7 @@ public class MeshData
     public void MakeFlatShaded()
     {
         // Your implementation
+        List<int> flattenedTriangles = new List<int>(triangles);
 
         List<Vector3> flattenedVertices = new List<Vector3>();
         for (int vertexI = 0; vertexI < vertices.Count; vertexI++)
@@ -101,10 +102,13 @@ public class MeshData
             for (int surfaceI = 0; surfaceI < currSurfaceIndices.Count; surfaceI++)
             {
                 Vector3 currVertex = vertices[vertexI];
-                flattenedVertices.Add(new Vector3(currVertex.x, currVertex.y, currVertex.z));
-                triangles[currSurfaceIndices[surfaceI]] += surfaceI;
+                flattenedTriangles[currSurfaceIndices[surfaceI]] = flattenedVertices.Count;
+//                flattenedVertices.Add(new Vector3(currVertex.x, currVertex.y, currVertex.z));
+                flattenedVertices.Add(currVertex);
             }
         }
+
+        triangles = flattenedTriangles;
 
         vertices = flattenedVertices;
     }
