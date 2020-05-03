@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\school_folders\67629_cg\computer_graphics_2020_huji\ex02_meshes_and_shading" t="IncludeRecursive">
+      <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
+      <e p="Assets" t="Include">
+        <e p="Materials" t="Include">
+          <e p="BlinnPhong.shader" t="Include" />
+          <e p="BlinnPhongGouraud.shader" t="Include" />
+          <e p="SurfaceNormals.shader" t="Include" />
+        </e>
+        <e p="Meshes" t="Include">
+          <e p="bunny.obj.txt" t="Include" />
+          <e p="elephant.obj.txt" t="Include" />
+          <e p="quad.obj.txt" t="Include" />
+          <e p="sphere.obj.txt" t="Include" />
+          <e p="teapot.obj.txt" t="Include" />
+        </e>
+        <e p="Scripts" t="Include">
+          <e p="MeshData.cs" t="Include" />
+          <e p="MeshViewer.cs" t="Include" />
+          <e p="OBJParser.cs" t="Include" />
+        </e>
+      </e>
+      <e p="ex02_meshes_and_shading.sln" t="IncludeFlat" />
+      <e p="obj" t="ExcludeRecursive" />
+      <e p="Packages" t="ExcludeRecursive" />
+      <e p="Temp\bin" t="ExcludeRecursive" />
+    </e>
+    <e p="C:\Users\alon\.Rider2019.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\alon\.Rider2019.2\system\resharper-host\local\Transient\ReSharperHost\v192\SolutionCaches\_ex02_meshes_and_shading.-775190375.00" t="ExcludeRecursive" />
+  </component>
+</project>
