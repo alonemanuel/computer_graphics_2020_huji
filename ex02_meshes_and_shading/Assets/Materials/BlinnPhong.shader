@@ -37,6 +37,7 @@
                 struct v2f
                 {
                     float4 pos : SV_POSITION;
+                    float3 normal : TEXCOORD0;
                 };
 
 
@@ -44,13 +45,18 @@
                 {
                     v2f output;
                     output.pos = UnityObjectToClipPos(input.vertex);
+                    output.normal = input.normal;
                     return output;
                 }
 
 
                 fixed4 frag (v2f input) : SV_Target
                 {
-                    return fixed4(0, 0, 1.0, 1.0);
+                    float4 deffuse = max(dot(_WorldSpaceLightPos0 ,input.normal), 0) *_DiffuseColor * _LightColor0;
+                    float3 h = normalize((_WorldSpaceCameraPos + _WorldSpaceLightPos0.xyz) / 2);
+                    float4 specular = pow(max(dot(h ,input.normal) , 0), _Shininess) *_SpecularColor * _LightColor0;
+                    float4 ambient = _AmbientColor * _LightColor0;
+                    return (deffuse + ambient + specular);
                 }
 
             ENDCG

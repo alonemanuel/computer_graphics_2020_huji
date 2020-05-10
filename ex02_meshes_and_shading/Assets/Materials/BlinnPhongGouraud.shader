@@ -46,7 +46,7 @@
                     v2f output;
                     output.pos = UnityObjectToClipPos(input.vertex);
                     float4 deffuse = max(dot(_WorldSpaceLightPos0 ,input.normal), 0) *_DiffuseColor * _LightColor0;
-                    float4 h = normalize(((_WorldSpaceCameraPos, 1) + _WorldSpaceLightPos0) / 2);
+                    float3 h = normalize((_WorldSpaceCameraPos + _WorldSpaceLightPos0.xyz) / 2);
                     float4 specular = pow(max(dot(h ,input.normal) , 0), _Shininess) *_SpecularColor * _LightColor0;
                     float4 ambient = _AmbientColor * _LightColor0;
                     output.color = (deffuse + ambient+ specular);
