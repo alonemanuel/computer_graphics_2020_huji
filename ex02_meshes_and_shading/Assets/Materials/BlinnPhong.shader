@@ -57,7 +57,7 @@
                     float4 worldPosNormal = normalize(mul(unity_ObjectToWorld, float4(input.normal, 0)));
                     float4 normalizedLightDir = normalize(_WorldSpaceLightPos0);
                     float4 worldPosCamera = mul(unity_ObjectToWorld, input.vertex);
-                    float normelizedWorldPosCamera = normalize(float4(_WorldSpaceCameraPos, 0) - worldPosCamera);
+                    float4 normelizedWorldPosCamera = normalize(float4(_WorldSpaceCameraPos, 0) - worldPosCamera);
                     
                     float4 deffuse = max(dot(normalizedLightDir ,worldPosNormal), 0) *_DiffuseColor * _LightColor0;
                     float4 h = normalize(((normelizedWorldPosCamera + normalizedLightDir) / 2));
