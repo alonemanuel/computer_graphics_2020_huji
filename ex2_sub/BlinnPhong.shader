@@ -38,7 +38,6 @@
                 {
                     float4 pos : SV_POSITION;
                     float3 normal : TEXCOORD0;
-                    float4 vertex : TEXCORD1;
                 };
 
 
@@ -47,23 +46,17 @@
                     v2f output;
                     output.pos = UnityObjectToClipPos(input.vertex);
                     output.normal = input.normal;
-                    output.vertex = input.vertex;
                     return output;
                 }
 
 
                 fixed4 frag (v2f input) : SV_Target
                 {
-                    float4 worldPosNormal = normalize(mul(unity_ObjectToWorld, float4(input.normal, 0)));
-                    float4 normalizedLightDir = normalize(_WorldSpaceLightPos0);
-                    float4 worldPosCamera = mul(unity_ObjectToWorld, input.vertex);
-                    float normelizedWorldPosCamera = normalize(float4(_WorldSpaceCameraPos, 0) - worldPosCamera);
-                    
-                    float4 deffuse = max(dot(normalizedLightDir ,worldPosNormal), 0) *_DiffuseColor * _LightColor0;
-                    float4 h = normalize(((normelizedWorldPosCamera + normalizedLightDir) / 2));
-                    float4 specular = pow(max(dot(h, worldPosNormal) , 0), _Shininess) *_SpecularColor * _LightColor0;
+                    float3 normalizedNormal = normalize(input.normal);
+                    float4 deffuse = max(dot(_WorldSpaceLightPos0 ,normalizedNormal), 0) *_DiffuseColor * _LightColor0;
+                    float3 h = normalize(((_WorldSpaceCameraPos, 1) + _WorldSpaceLightPos0) / 2);
+                    float4 specular = pow(max(dot(h , normalizedNormal) , 0), _Shininess) *_SpecularColor * _LightColor0;
                     float4 ambient = _AmbientColor * _LightColor0;
-                   
                     return (deffuse + ambient + specular);
                 }
 
