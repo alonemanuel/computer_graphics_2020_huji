@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
@@ -28,11 +29,73 @@ public static class CatmullClark
         meshData.edgePoints = GetEdgePoints(meshData);
         meshData.newPoints = GetNewPoints(meshData);
 
+
         // Combine facePoints, edgePoints and newPoints into a subdivided QuadMeshData
 
         // Your implementation here...
+        List<Vector3> vertices = meshData.newPoints.Concat(meshData.facePoints).Concat(meshData.edgePoints).ToList();
+        List<Vector4> quads = new List<Vector4>();
 
-        return new QuadMeshData();
+        // todo: finish this
+        
+//        for (int edgePointIndex=0;edgePointIndex<meshData.edgePoints;)
+
+        return new QuadMeshData(vertices, quads);
+    }
+
+    private static Dictionary<int, List<Vector3>> getEdgesMidpointsPerPoint(CCMeshData meshData)
+    {
+        Dictionary<int, List<Vector3>> edgeIndicesPerPoint = new Dictionary<int, List<Vector3>>();
+
+        // init edgeIndicesPerPoint dict
+        for (int pointIndex = 0; pointIndex < meshData.points.Count; pointIndex++)
+        {
+            edgeIndicesPerPoint[pointIndex] = new List<Vector3>();
+        }
+
+        // add edges indices to points
+        for (int edgeIndex = 0; edgeIndex < meshData.edges.Count; edgeIndex++)
+        {
+            Vector4 edge = meshData.edges[edgeIndex];
+
+
+            int point1Index = (int) edge[0];
+            int point2Index = (int) edge[1];
+
+            Vector3 point1 = meshData.points[point1Index];
+            Vector3 point2 = meshData.points[point2Index];
+
+            Vector3 edgeMidpoint = (point1 + point2) / 2;
+
+            edgeIndicesPerPoint[point1Index].Add(edgeMidpoint);
+            edgeIndicesPerPoint[point2Index].Add(edgeMidpoint);
+        }
+
+        return edgeIndicesPerPoint;
+    }
+
+    private static Dictionary<int, List<int>> getFacesIndicesPerPoint(CCMeshData meshData)
+    {
+        Dictionary<int, List<int>> faceIndicesPerPoint = new Dictionary<int, List<int>>();
+
+        // init edgeIndicesPerPoint dict
+        for (int pointIndex = 0; pointIndex < meshData.points.Count; pointIndex++)
+        {
+            faceIndicesPerPoint[pointIndex] = new List<int>();
+        }
+
+        // add edges indices to points
+        for (int faceIndex = 0; faceIndex < meshData.faces.Count; faceIndex++)
+        {
+            Vector4 face = meshData.faces[faceIndex];
+            for (int currPointIndexInFace = 0; currPointIndexInFace < 4; currPointIndexInFace++)
+            {
+                int currPointIndexInPoints = (int) face[currPointIndexInFace];
+                faceIndicesPerPoint[currPointIndexInPoints].Add(faceIndex);
+            }
+        }
+
+        return faceIndicesPerPoint;
     }
 
     // Returns a list of all edges in the mesh defined by given points and faces.
@@ -102,18 +165,88 @@ public static class CatmullClark
     // Returns a list of "face points" for the given CCMeshData, as described in the Catmull-Clark algorithm 
     public static List<Vector3> GetFacePoints(CCMeshData mesh)
     {
-        return null;
+        List<Vector3> facePoints = new List<Vector3>();
+
+        for (int faceIndex = 0; faceIndex < mesh.faces.Count; faceIndex++)
+        {
+            Vector3 sumVector = Vector3.zero;
+            for (int pointInFaceIndex = 0; pointInFaceIndex < 4; pointInFaceIndex++)
+            {
+                int pointInPointsIndex = (int) mesh.faces[faceIndex][pointInFaceIndex];
+                Vector3 currPoint = mesh.points[pointInPointsIndex];
+                sumVector += currPoint;
+            }
+
+            Vector3 facePoint = sumVector / 4;
+            facePoints.Add(facePoint);
+        }
+
+        return facePoints;
     }
 
     // Returns a list of "edge points" for the given CCMeshData, as described in the Catmull-Clark algorithm 
     public static List<Vector3> GetEdgePoints(CCMeshData mesh)
     {
-        return null;
+        List<Vector3> edgePoints = new List<Vector3>();
+
+        for (int edgeIndex = 0; edgeIndex < mesh.edges.Count; edgeIndex++)
+        {
+            Vector4 edge = mesh.edges[edgeIndex];
+            Vector3 point1 = mesh.points[(int) edge[0]];
+            Vector3 point2 = mesh.points[(int) edge[1]];
+            Vector3 facePoint1 = mesh.facePoints[(int) edge[2]];
+            Vector3 facePoint2 = mesh.facePoints[(int) edge[3]];
+
+            Vector3 edgePoint = (point1 + point2 + facePoint1 + facePoint2) / 4;
+            edgePoints.Add(edgePoint);
+        }
+
+        return edgePoints;
     }
 
     // Returns a list of new locations of the original points for the given CCMeshData, as described in the CC algorithm 
     public static List<Vector3> GetNewPoints(CCMeshData mesh)
     {
-        return null;
+        List<Vector3> newPoints = new List<Vector3>();
+        Dictionary<int, List<Vector3>> edgeMidpointPerPoint = getEdgesMidpointsPerPoint(mesh);
+        Dictionary<int, List<int>> facesIndicesPerPoint = getFacesIndicesPerPoint(mesh);
+
+
+        for (int origPointIndex = 0; origPointIndex < mesh.points.Count; origPointIndex++)
+        {
+            Vector3 p = mesh.points[origPointIndex]; // p = original point
+            List<Vector3> edgeMidpointsOfPoint = edgeMidpointPerPoint[origPointIndex];
+            List<int> facesOfPoint = facesIndicesPerPoint[origPointIndex];
+
+            int n = edgeMidpointsOfPoint.Count; // number of edges/faces neighboring p 
+
+
+            Vector3 f = Vector3.zero; // average of facepoints 
+            for (int faceOfPointIndex = 0; faceOfPointIndex < n; faceOfPointIndex++)
+            {
+                int currFaceOfPointIndex = facesOfPoint[faceOfPointIndex];
+                Vector3 facePoint = mesh.facePoints[currFaceOfPointIndex];
+                f += facePoint;
+            }
+
+            f /= n;
+
+
+            Vector3 r = Vector3.zero; // average of midpoints
+            for (int midpointIndex = 0; midpointIndex < n; midpointIndex++)
+            {
+                Vector3 midpoint = edgeMidpointsOfPoint[midpointIndex];
+                r += midpoint;
+            }
+
+            r /= n;
+
+
+            Vector3 newPoint = (f + 2 * r + (n - 3) * p) / n;
+            newPoints.Add(newPoint);
+        }
+
+
+        return newPoints;
     }
 }
