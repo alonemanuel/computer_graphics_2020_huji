@@ -35,38 +35,93 @@ public static class CatmullClark
         // Your implementation here...
         List<Vector3> vertices = new List<Vector3>();
         List<Vector4> quads = new List<Vector4>();
-        
+
         for (int faceIndex = 0; faceIndex < meshData.faces.Count; faceIndex++)
         {
+            Vector4 currQuad = new Vector4();
             Vector4 currFace = meshData.faces[faceIndex];
+            Vector3 currFacePoint = meshData.facePoints[faceIndex];
             // adding the face point to vertecies
             vertices.Add(meshData.facePoints[faceIndex]);
             for (int vertIndex = 0; vertIndex < 4; vertIndex++)
             {
-                Vector4 currQuad = new Vector4();
-                currQuad.x = vertices.IndexOf(meshData.facePoints[faceIndex]);
-                List<int> edgePointsIndices = GetEdgePointsFromFace(meshData, faceIndex, (int)currFace[vertIndex]);
-                Vector3 edge1 = meshData.edgePoints[(int) edgePointsIndices[0]];
-                currQuad.y = FindMyIndex(vertices, edge1);
-                Vector3 currVect = meshData.newPoints[(int) currFace[vertIndex]];
-                currQuad.z = FindMyIndex(vertices, currVect);
-                Vector3 edge2 = meshData.edgePoints[(int) edgePointsIndices[1]];
-                currQuad.w = FindMyIndex(vertices, edge2);
+                Vector3 currNewPoint = meshData.newPoints[(int) currFace[vertIndex]];
+
+                int leftVertex = (int) currFace[(vertIndex +3) % 4];
+                int centerVertex = (int) currFace[vertIndex];
+                int rightVertex = (int) currFace[(vertIndex + 1) % 4];
+
+                Vector2 leftEdge = new Vector2(leftVertex, centerVertex);
+                Vector2 rightEdge = new Vector2(centerVertex, rightVertex);
+
+                Vector3 leftEdgePoint = GetEdgePointFromEdge(meshData, leftEdge);
+                Vector3 rightEdgePoint = GetEdgePointFromEdge(meshData, rightEdge);
+
+                currQuad[0] = vertices.IndexOf(currFacePoint);
+                currQuad[1] = FindMyIndex(vertices, leftEdgePoint);
+                currQuad[2] = FindMyIndex(vertices, currNewPoint);
+                currQuad[3] = FindMyIndex(vertices, rightEdgePoint);
+//
+//                GameObject gameObject = new GameObject();
+//
+//                MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
+//                meshRenderer.sharedMaterial = new Material(Shader.Find("Standard"));
+//
+//                MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
+//
+//                Vector3[] verti = new Vector3[4]
+//                {
+//                    vertices[(int) currQuad[0]] + Vector3.forward, vertices[(int) currQuad[1]] + Vector3.forward,
+//                    vertices[(int) currQuad[2]] + Vector3.forward,
+//                    vertices[(int) currQuad[3]] + Vector3.forward
+//                };
+//
+//                Mesh mesh = new Mesh();
+//                mesh.vertices = verti;
+//
+//                int[] tris = new int[6]
+//                {
+//                    0, 2, 1,
+//                    2, 3, 1
+//                };
+//                mesh.triangles = tris;
+//                meshFilter.mesh = mesh;
+
                 quads.Add(currQuad);
             }
         }
-        foreach (Vector4 quad in quads)
-        {
-            Debug.Log("********** quad 1: **************");
-            Debug.Log("vert 1: "+ vertices[(int)quad.x]);
-            Debug.Log("vert 2: "+ vertices[(int)quad.y]);
-            Debug.Log("vert 3: "+ vertices[(int)quad.z]);
-            Debug.Log("vert 4: "+ vertices[(int)quad.w]);
-        }
-        
-        
-        
+
+//        foreach (Vector4 quad in quads)
+//        {
+//            Debug.Log("********** quad 1: **************");
+//            Debug.Log("vert 1: " + vertices[(int) quad.x]);
+//            Debug.Log("vert 2: " + vertices[(int) quad.y]);
+//            Debug.Log("vert 3: " + vertices[(int) quad.z]);
+//            Debug.Log("vert 4: " + vertices[(int) quad.w]);
+//        }
+
+
         return new QuadMeshData(vertices, quads);
+    }
+
+    private static Vector3 GetEdgePointFromEdge(CCMeshData meshData, Vector2 edge)
+    {
+        for (int edgeIndex = 0; edgeIndex < meshData.edges.Count; edgeIndex++)
+        {
+            Vector4 currEdge = meshData.edges[edgeIndex];
+            int firstPoint = (int) currEdge[0];
+            int secondPoint = (int) currEdge[1];
+            
+            bool same = (edge.x == firstPoint) && (edge.y == secondPoint);
+            bool flipped = (edge.y == firstPoint) && (edge.x == secondPoint);
+            if (same || flipped)
+            {
+                return meshData.edgePoints[edgeIndex];
+            }
+        }
+
+        Debug.Log(("Bas return"));
+        return meshData.edgePoints[0];
     }
 
     private static int FindMyIndex(List<Vector3> vertices, Vector3 point)
@@ -75,15 +130,16 @@ public static class CatmullClark
         if (edgeIndex < 0)
         {
             vertices.Add(point);
-            return (vertices.Count-1);
+            return (vertices.Count - 1);
         }
+
         return edgeIndex;
     }
 
 
     private static List<int> GetEdgePointsFromFace(CCMeshData meshData, int faceIndex, int vertIndex)
     {
-        List<int> edges =new List<int>();
+        List<int> edges = new List<int>();
         edges.Add(-1);
         edges.Add(-1);
         for (int edgeIndex = 0; edgeIndex < meshData.edges.Count; edgeIndex++)
@@ -100,11 +156,13 @@ public static class CatmullClark
                     else
                     {
                         edges[1] = edgeIndex;
+//                        edges.Sort();
                         return edges;
                     }
                 }
             }
         }
+
         return edges;
     }
 
@@ -156,6 +214,7 @@ public static class CatmullClark
                 faceIndicesPerPoint[currPointIndexInPoints].Add(faceIndex);
             }
         }
+
         return faceIndicesPerPoint;
     }
 
@@ -171,7 +230,7 @@ public static class CatmullClark
 
         List<Vector4> edges = new List<Vector4>();
         // todo: we're assuming the points in the faces are ordered
-        
+
         // for face in the mash
         for (int i = 0; i < mesh.faces.Count; i++)
         {
@@ -187,10 +246,11 @@ public static class CatmullClark
                 {
                     edgesDict.Add(newEdge, new List<int>());
                 }
+
                 edgesDict[newEdge].Add(i);
             }
         }
-        
+
         // creating a Vector 4 of the edges.
         foreach (KeyValuePair<Vector2, List<int>> edge in edgesDict)
         {
@@ -198,6 +258,7 @@ public static class CatmullClark
             edges.Add(newEdge);
             //Debug.Log("vec1: "+ edge.Key.x+ ", vec2: "+ edge.Key.y + ", face1: "+ edge.Value[0]+ ", face2: " + edge.Value[1]);
         }
+
         return edges;
     }
 
@@ -207,8 +268,10 @@ public static class CatmullClark
 
         public override bool Equals(Vector2 firstPoint, Vector2 secondPoint)
         {
-            bool areSame = (Math.Abs(firstPoint.x - secondPoint.x) < EPSILON) && (Math.Abs(firstPoint.y - secondPoint.y) < EPSILON);
-            bool areFlipped = (Math.Abs(firstPoint.x - secondPoint.y) < EPSILON) && (Math.Abs(firstPoint.y - secondPoint.x) < EPSILON);
+            bool areSame = (Math.Abs(firstPoint.x - secondPoint.x) < EPSILON) &&
+                           (Math.Abs(firstPoint.y - secondPoint.y) < EPSILON);
+            bool areFlipped = (Math.Abs(firstPoint.x - secondPoint.y) < EPSILON) &&
+                              (Math.Abs(firstPoint.y - secondPoint.x) < EPSILON);
             return (areSame || areFlipped);
         }
 
