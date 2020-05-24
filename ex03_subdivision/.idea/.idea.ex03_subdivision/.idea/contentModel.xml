@@ -1,7 +1,7 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\school_folders\67629_cg\computer_graphics_2020_huji\ex03_subdivision" t="IncludeRecursive">
+    <e p="$PROJECT_DIR$" t="IncludeRecursive">
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
         <e p="Meshes" t="Include">
@@ -19,9 +19,9 @@
       <e p="ex03_subdivision.sln" t="IncludeFlat" />
       <e p="obj" t="ExcludeRecursive" />
       <e p="Packages" t="ExcludeRecursive" />
-      <e p="Temp\bin" t="ExcludeRecursive" />
+      <e p="Temp/bin" t="ExcludeRecursive" />
     </e>
-    <e p="C:\Users\alon\.Rider2019.2\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\alon\.Rider2019.2\system\resharper-host\local\Transient\ReSharperHost\v192\SolutionCaches\_ex03_subdivision.1593654273.00" t="ExcludeRecursive" />
+    <e p="$USER_HOME$/Library/Caches/Rider2019.3/extResources" t="IncludeRecursive" />
+    <e p="$USER_HOME$/Library/Caches/Rider2019.3/resharper-host/local/Transient/ReSharperHost/v193/SolutionCaches/_ex03_subdivision.1901147561.00" t="ExcludeRecursive" />
   </component>
 </project>

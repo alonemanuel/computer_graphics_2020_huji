@@ -33,17 +33,82 @@ public static class CatmullClark
         // Combine facePoints, edgePoints and newPoints into a subdivided QuadMeshData
 
         // Your implementation here...
-        List<Vector3> vertices = meshData.newPoints.Concat(meshData.facePoints).Concat(meshData.edgePoints).ToList();
+        List<Vector3> vertices = new List<Vector3>();
         List<Vector4> quads = new List<Vector4>();
-
-        // todo: finish this
         
-//        for (int edgePointIndex=0;edgePointIndex<meshData.edgePoints;)
-
+        for (int faceIndex = 0; faceIndex < meshData.faces.Count; faceIndex++)
+        {
+            Vector4 currFace = meshData.faces[faceIndex];
+            // adding the face point to vertecies
+            vertices.Add(meshData.facePoints[faceIndex]);
+            for (int vertIndex = 0; vertIndex < 4; vertIndex++)
+            {
+                Vector4 currQuad = new Vector4();
+                currQuad.x = vertices.IndexOf(meshData.facePoints[faceIndex]);
+                List<int> edgePointsIndices = GetEdgePointsFromFace(meshData, faceIndex, (int)currFace[vertIndex]);
+                Vector3 edge1 = meshData.edgePoints[(int) edgePointsIndices[0]];
+                currQuad.y = FindMyIndex(vertices, edge1);
+                Vector3 currVect = meshData.newPoints[(int) currFace[vertIndex]];
+                currQuad.z = FindMyIndex(vertices, currVect);
+                Vector3 edge2 = meshData.edgePoints[(int) edgePointsIndices[1]];
+                currQuad.w = FindMyIndex(vertices, edge2);
+                quads.Add(currQuad);
+            }
+        }
+        foreach (Vector4 quad in quads)
+        {
+            Debug.Log("********** quad 1: **************");
+            Debug.Log("vert 1: "+ vertices[(int)quad.x]);
+            Debug.Log("vert 2: "+ vertices[(int)quad.y]);
+            Debug.Log("vert 3: "+ vertices[(int)quad.z]);
+            Debug.Log("vert 4: "+ vertices[(int)quad.w]);
+        }
+        
+        
+        
         return new QuadMeshData(vertices, quads);
     }
 
-    private static Dictionary<int, List<Vector3>> getEdgesMidpointsPerPoint(CCMeshData meshData)
+    private static int FindMyIndex(List<Vector3> vertices, Vector3 point)
+    {
+        int edgeIndex = vertices.IndexOf(point);
+        if (edgeIndex < 0)
+        {
+            vertices.Add(point);
+            return (vertices.Count-1);
+        }
+        return edgeIndex;
+    }
+
+
+    private static List<int> GetEdgePointsFromFace(CCMeshData meshData, int faceIndex, int vertIndex)
+    {
+        List<int> edges =new List<int>();
+        edges.Add(-1);
+        edges.Add(-1);
+        for (int edgeIndex = 0; edgeIndex < meshData.edges.Count; edgeIndex++)
+        {
+            Vector4 edge = meshData.edges[edgeIndex];
+            if (edge[0] == vertIndex || edge[1] == vertIndex)
+            {
+                if (edge[2] == faceIndex || edge[3] == faceIndex)
+                {
+                    if (edges[0] == -1)
+                    {
+                        edges[0] = edgeIndex;
+                    }
+                    else
+                    {
+                        edges[1] = edgeIndex;
+                        return edges;
+                    }
+                }
+            }
+        }
+        return edges;
+    }
+
+    private static Dictionary<int, List<Vector3>> GetEdgesMidpointsPerPoint(CCMeshData meshData)
     {
         Dictionary<int, List<Vector3>> edgeIndicesPerPoint = new Dictionary<int, List<Vector3>>();
 
@@ -54,11 +119,8 @@ public static class CatmullClark
         }
 
         // add edges indices to points
-        for (int edgeIndex = 0; edgeIndex < meshData.edges.Count; edgeIndex++)
+        foreach (var edge in meshData.edges)
         {
-            Vector4 edge = meshData.edges[edgeIndex];
-
-
             int point1Index = (int) edge[0];
             int point2Index = (int) edge[1];
 
@@ -74,7 +136,7 @@ public static class CatmullClark
         return edgeIndicesPerPoint;
     }
 
-    private static Dictionary<int, List<int>> getFacesIndicesPerPoint(CCMeshData meshData)
+    private static Dictionary<int, List<int>> GetFacesIndicesPerPoint(CCMeshData meshData)
     {
         Dictionary<int, List<int>> faceIndicesPerPoint = new Dictionary<int, List<int>>();
 
@@ -94,7 +156,6 @@ public static class CatmullClark
                 faceIndicesPerPoint[currPointIndexInPoints].Add(faceIndex);
             }
         }
-
         return faceIndicesPerPoint;
     }
 
@@ -102,7 +163,7 @@ public static class CatmullClark
     // Each edge is represented by Vector4(p1, p2, f1, f2)
     // p1, p2 are the edge vertices
     // f1, f2 are faces incident to the edge. If the edge belongs to one face only, f2 is -1
-    public static List<Vector4> GetEdges(CCMeshData mesh)
+    private static List<Vector4> GetEdges(CCMeshData mesh)
     {
         Vec2Comparer c = new Vec2Comparer();
         Dictionary<Vector2, List<int>> edgesDict = new Dictionary<Vector2, List<int>>(c);
@@ -110,11 +171,12 @@ public static class CatmullClark
 
         List<Vector4> edges = new List<Vector4>();
         // todo: we're assuming the points in the faces are ordered
-
+        
+        // for face in the mash
         for (int i = 0; i < mesh.faces.Count; i++)
         {
-            Debug.Log($"Processing face {i}...");
             Vector4 currFace = mesh.faces[i];
+            // for each point in the face
             for (int j = 0; j < 4; j++)
             {
                 int firstPointIndex = (int) currFace[j];
@@ -125,35 +187,29 @@ public static class CatmullClark
                 {
                     edgesDict.Add(newEdge, new List<int>());
                 }
-
                 edgesDict[newEdge].Add(i);
             }
         }
-
+        
+        // creating a Vector 4 of the edges.
         foreach (KeyValuePair<Vector2, List<int>> edge in edgesDict)
         {
-            Debug.Log($"Processing edge ({edge.Key.x}, {edge.Key.y})...");
             Vector4 newEdge = new Vector4(edge.Key.x, edge.Key.y, edge.Value[0], edge.Value[1]);
             edges.Add(newEdge);
+            //Debug.Log("vec1: "+ edge.Key.x+ ", vec2: "+ edge.Key.y + ", face1: "+ edge.Value[0]+ ", face2: " + edge.Value[1]);
         }
-
         return edges;
     }
 
-    public class Vec2Comparer : EqualityComparer<Vector2>
+    private class Vec2Comparer : EqualityComparer<Vector2>
     {
         private static readonly float EPSILON = 1e-5f;
 
         public override bool Equals(Vector2 firstPoint, Vector2 secondPoint)
         {
-            bool areSame = (firstPoint.x == secondPoint.x) && (firstPoint.y == secondPoint.y);
-            bool areFlipped = (firstPoint.x == secondPoint.y) && (firstPoint.y == secondPoint.x);
-            if (areSame || areFlipped)
-            {
-                return true;
-            }
-
-            return false;
+            bool areSame = (Math.Abs(firstPoint.x - secondPoint.x) < EPSILON) && (Math.Abs(firstPoint.y - secondPoint.y) < EPSILON);
+            bool areFlipped = (Math.Abs(firstPoint.x - secondPoint.y) < EPSILON) && (Math.Abs(firstPoint.y - secondPoint.x) < EPSILON);
+            return (areSame || areFlipped);
         }
 
         public override int GetHashCode(Vector2 obj)
@@ -166,10 +222,11 @@ public static class CatmullClark
     public static List<Vector3> GetFacePoints(CCMeshData mesh)
     {
         List<Vector3> facePoints = new List<Vector3>();
-
+        // for each face in the mesh.
         for (int faceIndex = 0; faceIndex < mesh.faces.Count; faceIndex++)
         {
             Vector3 sumVector = Vector3.zero;
+            // for each point in the face (summing them all up)
             for (int pointInFaceIndex = 0; pointInFaceIndex < 4; pointInFaceIndex++)
             {
                 int pointInPointsIndex = (int) mesh.faces[faceIndex][pointInFaceIndex];
@@ -188,7 +245,7 @@ public static class CatmullClark
     public static List<Vector3> GetEdgePoints(CCMeshData mesh)
     {
         List<Vector3> edgePoints = new List<Vector3>();
-
+        // for all edge we calculate the average. 
         for (int edgeIndex = 0; edgeIndex < mesh.edges.Count; edgeIndex++)
         {
             Vector4 edge = mesh.edges[edgeIndex];
@@ -208,10 +265,10 @@ public static class CatmullClark
     public static List<Vector3> GetNewPoints(CCMeshData mesh)
     {
         List<Vector3> newPoints = new List<Vector3>();
-        Dictionary<int, List<Vector3>> edgeMidpointPerPoint = getEdgesMidpointsPerPoint(mesh);
-        Dictionary<int, List<int>> facesIndicesPerPoint = getFacesIndicesPerPoint(mesh);
+        Dictionary<int, List<Vector3>> edgeMidpointPerPoint = GetEdgesMidpointsPerPoint(mesh);
+        Dictionary<int, List<int>> facesIndicesPerPoint = GetFacesIndicesPerPoint(mesh);
 
-
+        // for each point in the mesh
         for (int origPointIndex = 0; origPointIndex < mesh.points.Count; origPointIndex++)
         {
             Vector3 p = mesh.points[origPointIndex]; // p = original point
@@ -242,7 +299,7 @@ public static class CatmullClark
             r /= n;
 
 
-            Vector3 newPoint = (f + 2 * r + (n - 3) * p) / n;
+            Vector3 newPoint = (f + (2 * r) + ((n - 3) * p)) / n;
             newPoints.Add(newPoint);
         }
 
