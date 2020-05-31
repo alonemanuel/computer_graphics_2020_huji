@@ -34,10 +34,7 @@ public static class CatmullClark
 
         // Your implementation here...
         List<Vector3> vertices = new List<Vector3>();
-        Dictionary<Vector3, int> verticesDictionary = new Dictionary<Vector3, int>();
         List<Vector4> quads = new List<Vector4>();
-
-        Dictionary<Vector2, int> edgesDictionary = initEgdesDictionary(vertices, meshData);
 
         for (int faceIndex = 0; faceIndex < meshData.faces.Count; faceIndex++)
         {
@@ -46,7 +43,6 @@ public static class CatmullClark
             Vector3 currFacePoint = meshData.facePoints[faceIndex];
             // adding the face point to vertecies
             vertices.Add(meshData.facePoints[faceIndex]);
-            verticesDictionary[meshData.facePoints[faceIndex]] = vertices.Count - 1;
             for (int vertIndex = 0; vertIndex < 4; vertIndex++)
             {
                 Vector3 currNewPoint = meshData.newPoints[(int) currFace[vertIndex]];
@@ -58,57 +54,89 @@ public static class CatmullClark
                 Vector2 leftEdge = new Vector2(leftVertex, centerVertex);
                 Vector2 rightEdge = new Vector2(centerVertex, rightVertex);
 
-                Vector3 leftEdgePoint = GetEdgePointFromEdge(edgesDictionary, meshData, leftEdge);
-                Vector3 rightEdgePoint = GetEdgePointFromEdge(edgesDictionary, meshData, rightEdge);
+                Vector3 leftEdgePoint = GetEdgePointFromEdge(meshData, leftEdge);
+                Vector3 rightEdgePoint = GetEdgePointFromEdge(meshData, rightEdge);
 
-                currQuad[0] = verticesDictionary[currFacePoint];
-                currQuad[1] = FindMyIndex(vertices, leftEdgePoint, verticesDictionary);
-                currQuad[2] = FindMyIndex(vertices, currNewPoint, verticesDictionary);
-                currQuad[3] = FindMyIndex(vertices, rightEdgePoint, verticesDictionary);
+                currQuad[0] = vertices.IndexOf(currFacePoint);
+                currQuad[1] = FindMyIndex(vertices, leftEdgePoint);
+                currQuad[2] = FindMyIndex(vertices, currNewPoint);
+                currQuad[3] = FindMyIndex(vertices, rightEdgePoint);
+//
+//                GameObject gameObject = new GameObject();
+//
+//                MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
+//                meshRenderer.sharedMaterial = new Material(Shader.Find("Standard"));
+//
+//                MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
+//
+//                Vector3[] verti = new Vector3[4]
+//                {
+//                    vertices[(int) currQuad[0]] + Vector3.forward, vertices[(int) currQuad[1]] + Vector3.forward,
+//                    vertices[(int) currQuad[2]] + Vector3.forward,
+//                    vertices[(int) currQuad[3]] + Vector3.forward
+//                };
+//
+//                Mesh mesh = new Mesh();
+//                mesh.vertices = verti;
+//
+//                int[] tris = new int[6]
+//                {
+//                    0, 2, 1,
+//                    2, 3, 1
+//                };
+//                mesh.triangles = tris;
+//                meshFilter.mesh = mesh;
 
                 quads.Add(currQuad);
             }
         }
-        
+
+//        foreach (Vector4 quad in quads)
+//        {
+//            Debug.Log("********** quad 1: **************");
+//            Debug.Log("vert 1: " + vertices[(int) quad.x]);
+//            Debug.Log("vert 2: " + vertices[(int) quad.y]);
+//            Debug.Log("vert 3: " + vertices[(int) quad.z]);
+//            Debug.Log("vert 4: " + vertices[(int) quad.w]);
+//        }
+
+
         return new QuadMeshData(vertices, quads);
     }
 
-    private static Dictionary<Vector2, int> initEgdesDictionary(List<Vector3> vertices, CCMeshData meshData)
+    private static Vector3 GetEdgePointFromEdge(CCMeshData meshData, Vector2 edge)
     {
-        Dictionary<Vector2, int> resDict = new Dictionary<Vector2, int>();
-        for (int edgeIndex =0; edgeIndex<meshData.edges.Count; edgeIndex++)
+        for (int edgeIndex = 0; edgeIndex < meshData.edges.Count; edgeIndex++)
         {
-            Vector4 curredge = meshData.edges[edgeIndex];
-            Vector2 newEdge = new Vector2();
-            newEdge.x  = curredge[0];
-            newEdge.y = curredge[1];
-
-            resDict[newEdge] = edgeIndex;
+            Vector4 currEdge = meshData.edges[edgeIndex];
+            int firstPoint = (int) currEdge[0];
+            int secondPoint = (int) currEdge[1];
+            
+            bool same = (edge.x == firstPoint) && (edge.y == secondPoint);
+            bool flipped = (edge.y == firstPoint) && (edge.x == secondPoint);
+            if (same || flipped)
+            {
+                return meshData.edgePoints[edgeIndex];
+            }
         }
 
-        return resDict;
+        Debug.Log(("Bas return"));
+        return meshData.edgePoints[0];
     }
 
-    private static Vector3 GetEdgePointFromEdge(Dictionary<Vector2, int> edgeDict,CCMeshData meshData, Vector2 edge)
+    private static int FindMyIndex(List<Vector3> vertices, Vector3 point)
     {
-        if (edgeDict.ContainsKey(edge))
-        {
-            return meshData.edgePoints[edgeDict[edge]];
-        }
-        Vector2 flipped = new Vector2(edge[1], edge[0]);
-        return  meshData.edgePoints[edgeDict[flipped]];
-    }
-
-    private static int FindMyIndex(List<Vector3> vertices, Vector3 point, Dictionary<Vector3, int> vectDict)
-    {
-        if (!vectDict.ContainsKey(point))
+        int edgeIndex = vertices.IndexOf(point);
+        if (edgeIndex < 0)
         {
             vertices.Add(point);
-            vectDict[point] = vertices.Count - 1;
+            return (vertices.Count - 1);
         }
-        return vectDict[point];
+
+        return edgeIndex;
     }
-    
+
+
     private static List<int> GetEdgePointsFromFace(CCMeshData meshData, int faceIndex, int vertIndex)
     {
         List<int> edges = new List<int>();
