@@ -43,18 +43,44 @@
                 struct v2f
                 {
                     float4 pos : SV_POSITION;
+                    float4 worldPos: TEXCOORD0;
+                    float4 objectPos: TEXCOORD1;
                 };
 
                 v2f vert (appdata input)
                 {
                     v2f output;
+                    
                     output.pos = UnityObjectToClipPos(input.vertex);
+                    output.worldPos = mul(unity_ObjectToWorld, input.vertex);
+                    output.objectPos = input.vertex;
                     return output;
                 }
 
                 fixed4 frag (v2f input) : SV_Target
                 {
-                    return 1;
+                     float3 normal = normalize(float3(input.worldPos.xyz));
+                    float2 uv = getSphericalUV(input.worldPos);
+                    bumpMapData bumpData;
+                    bumpData.normal = normal;
+                    bumpData.tangent = cross(normal, float3(0,1,0));
+                    bumpData.uv = uv;
+                    bumpData.heightMap = _HeightMap;
+                    bumpData.du = _HeightMap_TexelSize.x;
+                    bumpData.dv = _HeightMap_TexelSize.y;
+                    bumpData.bumpScale = _BumpScale / 10000;
+                    float3 n = getBumpMappedNormal(bumpData);
+                    float4 worldPosCamera = mul(unity_ObjectToWorld, input.pos);
+                    float3 v = normalize(_WorldSpaceCameraPos - worldPosCamera);
+                    float3 l = normalize(_WorldSpaceLightPos0);
+                  
+                   
+                    fixed4 albedo = tex2D(_AlbedoMap, uv);  
+                    fixed4 specularity = tex2D(_SpecularMap, uv);
+                
+                    n = (1 - specularity) * n + (specularity * normal);
+                
+                    return fixed4(blinnPhong(n, v, l, _Shininess, albedo, specularity, _Ambient),1);   
                 }
 
             ENDCG
