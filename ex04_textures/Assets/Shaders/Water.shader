@@ -38,33 +38,73 @@
                 struct v2f
                 {
                     float4 pos      : SV_POSITION;
+                    float2 uv       : TEXCOORD1;
+                    float3 normal   : TEXCOORD2;
+                    float3 vertex   : TEXCOORD3;
+                    float3 tangent   : TEXCOORD4;
                 };
 
                 // Returns the value of a noise function simulating water, at coordinates uv and time t
                 float waterNoise(float2 uv, float t)
                 {
-                    // Your implementation
-                    return 0;
+                    float c = perlin2d(uv);
+                    return c;
                 }
 
                 // Returns the world-space bump-mapped normal for the given bumpMapData and time t
                 float3 getWaterBumpMappedNormal(bumpMapData i, float t)
                 {
-                    // Your implementation
-                    return 0;
-                }
+                    float f_du = (waterNoise((i.uv + i.du), t) - waterNoise(i.uv, t)) / i.du;
+                    float f_dv = (waterNoise((i.uv+i.dv), t) - waterNoise(i.uv, t)) / i.dv;
+                   
+                    float3 n_h = normalize(float3(-i.bumpScale * f_du, -i.bumpScale * f_dv, 1));
+                    
+                    float3 n_world = mul(unity_ObjectToWorld, i.normal);
+                    float3 t_world = mul(unity_ObjectToWorld, i.tangent);
+                    float3 b = cross(n_world, t_world);
+                    
+                    float3 world_nh = n_h.x*t_world + n_h.y*b + n_h.z*n_world;
+                    return world_nh;
+                                }
 
 
                 v2f vert (appdata input)
                 {
                     v2f output;
-                    output.pos = UnityObjectToClipPos(input.vertex);
+                    output.uv = input.uv;
+                    output.vertex = input.vertex;
+                    output.normal = input.normal;
+                    output.tangent = input.tangent;
+                    float2 uv = _NoiseScale * input.uv;
+                    float c = waterNoise(uv, 0) * _BumpScale;
+                    float y = input.vertex.y + c;
+                    output.pos = UnityObjectToClipPos(float3(input.vertex.x , y, input.vertex.z));
                     return output;
                 }
 
                 fixed4 frag (v2f input) : SV_Target
                 {
-                    return 1;
+                    float2 uv = _NoiseScale * input.uv;
+                    //float c = waterNoise(uv, 0);
+                    //c = c * 0.5 + 0.5; // Normalize to [0,1]
+                    
+                    bumpMapData bumpData;
+                    bumpData.normal = normalize(input.normal);
+                    bumpData.tangent = input.tangent;
+                    bumpData.uv = uv;
+                    bumpData.du = DELTA;
+                    bumpData.dv = DELTA;
+                    bumpData.bumpScale = _BumpScale;
+                    float3 n = getWaterBumpMappedNormal(bumpData, 0);
+                    
+                    float4 worldPosCamera = mul(unity_ObjectToWorld, input.vertex);
+                    float3 v = normalize(_WorldSpaceCameraPos - worldPosCamera);
+                    
+                    float3 reflection = ((2 * dot(v, n)) * n) - v;
+                    fixed4 r = texCUBE( _CubeMap, reflection);
+                    
+                    fixed4 color = (1- max(0, dot(n,v))+ 0.2) *  r;
+                    return color;
                 }
 
             ENDCG
