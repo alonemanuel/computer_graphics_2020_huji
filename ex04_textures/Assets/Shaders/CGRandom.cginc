@@ -58,7 +58,14 @@ float bicubicInterpolation(float2 v[4], float2 t)
 float biquinticInterpolation(float2 v[4], float2 t)
 {
     // Your implementation
-    return 0;
+    float2 u = t * t * t * (10.0 - 15.0 * t + 6.0 * t * t); // Cubic interpolation
+
+    // Interpolate in the x direction
+    float x1 = lerp(v[0], v[1], u.x);
+    float x2 = lerp(v[2], v[3], u.x);
+
+    // Interpolate in the y direction and return
+    return lerp(x1, x2, u.y);
 }
 
 // Interpolates a given array v of 8 float3 values using triquintic interpolation
@@ -72,15 +79,49 @@ float triquinticInterpolation(float3 v[8], float3 t)
 // Returns the value of a 2D value noise function at the given coordinates c
 float value2d(float2 c)
 {
+    float2 upLeft = float2(floor(c.x), ceil(c.y));
+    float2 downLeft = float2(floor(c.x), floor(c.y));
+    float2 upRight = float2(ceil(c.x), ceil(c.y));
+    float2 downRight = float2(ceil(c.x), floor(c.y));
+    float2 randUpLeft = (random2(upLeft));
+    float2 randDownLeft = (random2(downLeft));
+    float2 randUpRight = (random2(upRight));
+    float2 randDownRight = (random2(downRight));
+    
+    float2 v[4] = { randDownLeft, randDownRight, randUpLeft, randUpRight};
+    float2 fracC = frac(c);
+    float randC = bicubicInterpolation(v, fracC);
     // Your implementation
-    return 0;
+    return randC;
 }
 
 // Returns the value of a 2D Perlin noise function at the given coordinates c
 float perlin2d(float2 c)
 {
     // Your implementation
-    return 0;
+    float2 upLeft = float2(floor(c.x), ceil(c.y));
+    float2 downLeft = float2(floor(c.x), floor(c.y));
+    float2 upRight = float2(ceil(c.x), ceil(c.y));
+    float2 downRight = float2(ceil(c.x), floor(c.y));
+    float2 randUpLeft = (random2(upLeft));
+    float2 randDownLeft = (random2(downLeft));
+    float2 randUpRight = (random2(upRight));
+    float2 randDownRight = (random2(downRight));
+    
+    float2 disUpLeft = upLeft - c;
+    float2 disUpRight = upRight - c;
+    float2 disDownLeft = downLeft - c;
+    float2 disDownRight = downRight - c;
+    
+    float2 dotUpLeft = dot(randUpLeft, disUpLeft);
+    float2 dotUpRight = dot( randUpRight, disUpRight);
+    float2 dotDownLeft = dot( randDownLeft, disDownLeft);
+    float2 dotDownRight = dot( randDownRight, disDownRight);
+    
+    float2 v[4] = { dotDownLeft, dotDownRight, dotUpLeft, dotUpRight};
+    float2 fracC = frac(c);
+    float randC = biquinticInterpolation(v, fracC);
+    return randC;
 }
 
 // Returns the value of a 3D Perlin noise function at the given coordinates c

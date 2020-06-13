@@ -1,10 +1,10 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\school_folders\67629_cg\computer_graphics_2020_huji\ex04_textures" t="IncludeFlat">
+    <e p="$PROJECT_DIR$" t="IncludeFlat">
       <e p="ex04_textures.sln" t="IncludeFlat" />
     </e>
-    <e p="C:\Users\alon\.Rider2019.2\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\alon\.Rider2019.2\system\resharper-host\local\Transient\ReSharperHost\v192\SolutionCaches\_ex04_textures.-977985847.00" t="ExcludeRecursive" />
+    <e p="$USER_HOME$/Library/Caches/Rider2019.3/extResources" t="IncludeRecursive" />
+    <e p="$USER_HOME$/Library/Caches/Rider2019.3/resharper-host/local/Transient/ReSharperHost/v193/SolutionCaches/_ex04_textures.2084332651.00" t="ExcludeRecursive" />
   </component>
 </project>

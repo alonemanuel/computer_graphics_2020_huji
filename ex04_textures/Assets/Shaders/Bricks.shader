@@ -55,7 +55,7 @@ Shader "CG/Bricks"
                     output.uv = input.uv;
                     output.normal = input.normal;
                     output.tangent = input.tangent;
-                    
+                    output.vertex = input.vertex;
                     return output;
                 }
 
