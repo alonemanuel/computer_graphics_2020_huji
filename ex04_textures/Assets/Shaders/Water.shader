@@ -48,8 +48,8 @@
                 float waterNoise(float2 uv, float t)
                 {
                     float c = perlin3d(float3((0.5 * uv.x), (0.5 * uv.y) , (0.5 * t)));
-                    float c1 = perlin3d(float3(uv.x, uv.y ,t));
-                    float c2 = perlin3d(float3((2 * uv.x), (2 * uv.y), (2 * t)));
+                    float c1 = perlin3d(float3(uv,t));
+                    float c2 = perlin3d(float3((2 * uv.x), (2 * uv.y), (3 * t)));
                     return c + (0.5 * c1) + (0.2 * c2);
                 }
 
@@ -78,7 +78,7 @@
                     output.normal = input.normal;
                     output.tangent = input.tangent;
                     float2 uv = _NoiseScale * input.uv;
-                    float c = waterNoise(uv, (_Time * _TimeScale)) * _BumpScale;
+                    float c = waterNoise(uv, (_Time.y * _TimeScale)) * _BumpScale;
                     float y = input.vertex.y + c;
                     output.pos = UnityObjectToClipPos(float3(input.vertex.x , y, input.vertex.z));
                     return output;

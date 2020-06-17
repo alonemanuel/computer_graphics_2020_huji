@@ -176,8 +176,8 @@ float perlin3d(float3 c)
     float3 dotDownRightFront = dot(randDownRightFront, disDownRightFront);
     float3 dotDownRightBack = dot(randDownRightBack, disDownRightBack);
     
-    float3 v[8] = { dotDownLeftFront, dotDownLeftBack, dotDownRightFront, dotDownRightBack,
-     dotUpLeftFront, dotUpLeftBack, dotUpRightFront, dotUpRightBack};
+    float3 v[8] = {dotDownLeftBack, dotDownRightBack, dotUpLeftBack, dotUpRightBack, dotDownLeftFront,dotDownRightFront,dotUpRightFront,
+     dotUpLeftFront};
     float3 fracC = frac(c);
     float randC = triquinticInterpolation(v, fracC);
     return randC;
