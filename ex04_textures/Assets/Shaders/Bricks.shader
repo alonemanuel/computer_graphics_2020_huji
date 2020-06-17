@@ -70,10 +70,9 @@ Shader "CG/Bricks"
                     bumpData.dv = _HeightMap_TexelSize.y;
                     bumpData.bumpScale = _BumpScale / 10000;
                     float3 n = getBumpMappedNormal(bumpData);
-                    float4 worldPosCamera = mul(unity_ObjectToWorld, input.vertex);
-                    float3 v = normalize(_WorldSpaceCameraPos - worldPosCamera);
-
-                    float3 l = normalize(_WorldSpaceLightPos0);
+                    float4 worldPosCamera = mul(unity_WorldToObject, _WorldSpaceCameraPos);
+                    float3 v = normalize(worldPosCamera - input.vertex);
+                    float3 l = normalize(mul(unity_WorldToObject, _WorldSpaceLightPos0));
                   
                    
                     fixed4 albedo = tex2D(_AlbedoMap, input.uv);  

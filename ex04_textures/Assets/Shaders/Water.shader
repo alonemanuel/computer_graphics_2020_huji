@@ -47,8 +47,10 @@
                 // Returns the value of a noise function simulating water, at coordinates uv and time t
                 float waterNoise(float2 uv, float t)
                 {
-                    float c = perlin2d(uv);
-                    return c;
+                    float c = perlin3d(float3((0.5 * uv.x), (0.5 * uv.y) , (0.5 * t)));
+                    float c1 = perlin3d(float3(uv.x, uv.y ,t));
+                    float c2 = perlin3d(float3((2 * uv.x), (2 * uv.y), (2 * t)));
+                    return c + (0.5 * c1) + (0.2 * c2);
                 }
 
                 // Returns the world-space bump-mapped normal for the given bumpMapData and time t
@@ -61,11 +63,11 @@
                     
                     float3 n_world = mul(unity_ObjectToWorld, i.normal);
                     float3 t_world = mul(unity_ObjectToWorld, i.tangent);
-                    float3 b = cross(n_world, t_world);
+                    float3 b = cross(t_world, n_world);
                     
                     float3 world_nh = n_h.x*t_world + n_h.y*b + n_h.z*n_world;
-                    return world_nh;
-                                }
+                    return normalize(world_nh);
+                }
 
 
                 v2f vert (appdata input)
@@ -76,7 +78,7 @@
                     output.normal = input.normal;
                     output.tangent = input.tangent;
                     float2 uv = _NoiseScale * input.uv;
-                    float c = waterNoise(uv, 0) * _BumpScale;
+                    float c = waterNoise(uv, (_Time * _TimeScale)) * _BumpScale;
                     float y = input.vertex.y + c;
                     output.pos = UnityObjectToClipPos(float3(input.vertex.x , y, input.vertex.z));
                     return output;
@@ -85,8 +87,8 @@
                 fixed4 frag (v2f input) : SV_Target
                 {
                     float2 uv = _NoiseScale * input.uv;
-                    //float c = waterNoise(uv, 0);
-                    //c = c * 0.5 + 0.5; // Normalize to [0,1]
+                    float c = waterNoise(uv, 0);
+                    c = c * 0.5 + 0.5; // Normalize to [0,1]
                     
                     bumpMapData bumpData;
                     bumpData.normal = normalize(input.normal);

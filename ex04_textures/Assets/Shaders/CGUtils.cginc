@@ -26,7 +26,7 @@ float2 getSphericalUV(float3 pos)
     float ph = acos(pos.y / r);
     
     float2 uv;
-    uv.x = (0.5 + th)/(2*PI);
+    uv.x = 0.5 + (th/(2*PI));
     uv.y = 1 - (ph/PI);
     return uv;
 }
@@ -48,16 +48,16 @@ float3 getBumpMappedNormal(bumpMapData i)
 {
     // Your implementation
     
-    float f_du = (tex2D(i.heightMap, i.uv + i.du) - tex2D(i.heightMap, i.uv)) / i.du; 
-    float f_dv = (tex2D(i.heightMap, i.uv + i.dv) - tex2D(i.heightMap, i.uv)) / i.dv; 
-    float3 n_h = normalize(float3(-i.bumpScale * f_du, -i.bumpScale * f_dv, 1));
+    float f_du = ((tex2D(i.heightMap, i.uv + i.du)) - (tex2D(i.heightMap, i.uv))) / i.du; 
+    float f_dv = ((tex2D(i.heightMap, i.uv + i.dv)) - (tex2D(i.heightMap, i.uv))) / i.dv; 
+    float3 n_h = normalize(float3((-1  * i.bumpScale * f_du), (-1 * i.bumpScale * f_dv), 1));
     
-    float3 n_world = mul(unity_ObjectToWorld, i.normal);
+    float3 n_world = normalize(mul(unity_ObjectToWorld, i.normal));
     float3 t_world = mul(unity_ObjectToWorld, i.tangent);
-    float3 b = cross(n_world, t_world);
+    float3 b = cross(t_world, n_world);
     
     float3 world_nh = n_h.x*t_world + n_h.y*b + n_h.z*n_world;
-    return world_nh;
+    return normalize(world_nh);
 }
 
 

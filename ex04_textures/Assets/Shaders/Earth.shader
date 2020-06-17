@@ -59,8 +59,8 @@
 
                 fixed4 frag (v2f input) : SV_Target
                 {
-                     float3 normal = normalize(float3(input.worldPos.xyz));
-                    float2 uv = getSphericalUV(input.worldPos);
+                    float3 normal = normalize(float3(input.objectPos.xyz));
+                    float2 uv = getSphericalUV(input.objectPos);
                     bumpMapData bumpData;
                     bumpData.normal = normal;
                     bumpData.tangent = cross(normal, float3(0,1,0));
@@ -70,7 +70,7 @@
                     bumpData.dv = _HeightMap_TexelSize.y;
                     bumpData.bumpScale = _BumpScale / 10000;
                     float3 n = getBumpMappedNormal(bumpData);
-                    float4 worldPosCamera = mul(unity_ObjectToWorld, input.pos);
+                    float4 worldPosCamera = mul(unity_ObjectToWorld, input.objectPos);
                     float3 v = normalize(_WorldSpaceCameraPos - worldPosCamera);
                     float3 l = normalize(_WorldSpaceLightPos0);
                   
@@ -79,8 +79,10 @@
                     fixed4 specularity = tex2D(_SpecularMap, uv);
                 
                     n = (1 - specularity) * n + (specularity * normal);
-                
-                    return fixed4(blinnPhong(n, v, l, _Shininess, albedo, specularity, _Ambient),1);   
+                    float lambert = max(0, dot(normal, l));
+                    fixed3 atmosphere = (1- max(0, dot(n, v))) * sqrt(lambert) * _AtmosphereColor;
+                    fixed3 clouds = tex2D(_CloudMap,uv) * (sqrt(lambert)+_Ambient);
+                    return fixed4(blinnPhong(n, v, l, _Shininess, albedo, specularity, _Ambient) + atmosphere + clouds ,1);   
                 }
 
             ENDCG

@@ -73,7 +73,20 @@ float biquinticInterpolation(float2 v[4], float2 t)
 float triquinticInterpolation(float3 v[8], float3 t)
 {
     // Your implementation
-    return 0;
+    float3 u = t * t * t * (10.0 - 15.0 * t + 6.0 * t * t); // Cubic interpolation
+
+    // Interpolate in the x direction
+    float x1 = lerp(v[0], v[1], u.x);
+    float x2 = lerp(v[2], v[3], u.x);
+    float x3 = lerp(v[4], v[5], u.x);
+    float x4 = lerp(v[6], v[7], u.x);
+
+    // Interpolate in the y direction
+    float y1 = lerp(x1, x2, u.y);
+    float y2 = lerp(x3, x4, u.y);
+    
+    // Interpolate in the z direction and return
+    return lerp(y1, y2, u.z);
 }
 
 // Returns the value of a 2D value noise function at the given coordinates c
@@ -128,7 +141,46 @@ float perlin2d(float2 c)
 float perlin3d(float3 c)
 {                    
     // Your implementation
-    return 0;
+    float3 upLeftFront = float3(floor(c.x), ceil(c.y), floor(c.z));
+    float3 upLeftBack = float3(floor(c.x), ceil(c.y), ceil(c.z));
+    float3 downLeftFront = float3(floor(c.x), floor(c.y), floor(c.z));
+    float3 downLeftBack = float3(floor(c.x), floor(c.y), ceil(c.z));
+    float3 upRightFront = float3(ceil(c.x), ceil(c.y), floor(c.z));
+    float3 upRightBack = float3(ceil(c.x), ceil(c.y), ceil(c.z));
+    float3 downRightFront = float3(ceil(c.x), floor(c.y), floor(c.z));
+    float3 downRightBack = float3(ceil(c.x), floor(c.y), ceil(c.z));
+    float3 randUpLeftFront = (random3(upLeftFront));
+    float3 randUpLeftBack = (random3(upLeftBack));
+    float3 randDownLeftFront = (random3(downLeftFront));
+    float3 randDownLeftBack = (random3(downLeftBack));
+    float3 randUpRightFront = (random3(upRightFront));
+    float3 randUpRightBack = (random3(upRightBack));
+    float3 randDownRightFront = (random3(downRightFront));
+    float3 randDownRightBack = (random3(downRightBack));
+    
+    float3 disUpLeftFront = upLeftFront - c;
+    float3 disUpLeftBack = upLeftBack - c;
+    float3 disUpRightFront = upRightFront - c;
+    float3 disUpRightBack = upRightBack - c;
+    float3 disDownLeftFront = downLeftFront - c;
+    float3 disDownLeftBack = downLeftBack - c;
+    float3 disDownRightFront = downRightFront - c;
+    float3 disDownRightBack = downRightBack - c;
+    
+    float3 dotUpLeftFront = dot(randUpLeftFront, disUpLeftFront);
+    float3 dotUpLeftBack = dot(randUpLeftBack, disUpLeftBack);
+    float3 dotUpRightFront = dot(randUpRightFront, disUpRightFront);
+    float3 dotUpRightBack = dot(randUpRightBack, disUpRightBack);
+    float3 dotDownLeftFront = dot(randDownLeftFront, disDownLeftFront);
+    float3 dotDownLeftBack = dot(randDownLeftBack, disDownLeftBack);
+    float3 dotDownRightFront = dot(randDownRightFront, disDownRightFront);
+    float3 dotDownRightBack = dot(randDownRightBack, disDownRightBack);
+    
+    float3 v[8] = { dotDownLeftFront, dotDownLeftBack, dotDownRightFront, dotDownRightBack,
+     dotUpLeftFront, dotUpLeftBack, dotUpRightFront, dotUpRightBack};
+    float3 fracC = frac(c);
+    float randC = triquinticInterpolation(v, fracC);
+    return randC;
 }
 
 
