@@ -86,10 +86,7 @@
 
                 fixed4 frag (v2f input) : SV_Target
                 {
-                    float2 uv = _NoiseScale * input.uv;
-                    float c = waterNoise(uv, 0);
-                    c = c * 0.5 + 0.5; // Normalize to [0,1]
-                    
+                    float2 uv = (input.uv * _NoiseScale);
                     bumpMapData bumpData;
                     bumpData.normal = normalize(input.normal);
                     bumpData.tangent = input.tangent;
@@ -97,8 +94,7 @@
                     bumpData.du = DELTA;
                     bumpData.dv = DELTA;
                     bumpData.bumpScale = _BumpScale;
-                    float3 n = getWaterBumpMappedNormal(bumpData, 0);
-                    
+                    float3 n = getWaterBumpMappedNormal(bumpData, (_Time.y * _TimeScale));
                     float4 worldPosCamera = mul(unity_ObjectToWorld, input.vertex);
                     float3 v = normalize(_WorldSpaceCameraPos - worldPosCamera);
                     

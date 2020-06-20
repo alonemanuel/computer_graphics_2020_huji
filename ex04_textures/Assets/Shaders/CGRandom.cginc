@@ -141,47 +141,55 @@ float perlin2d(float2 c)
 float perlin3d(float3 c)
 {                    
     // Your implementation
-    float3 upLeftFront = float3(floor(c.x), ceil(c.y), floor(c.z));
-    float3 upLeftBack = float3(floor(c.x), ceil(c.y), ceil(c.z));
-    float3 downLeftFront = float3(floor(c.x), floor(c.y), floor(c.z));
-    float3 downLeftBack = float3(floor(c.x), floor(c.y), ceil(c.z));
-    float3 upRightFront = float3(ceil(c.x), ceil(c.y), floor(c.z));
-    float3 upRightBack = float3(ceil(c.x), ceil(c.y), ceil(c.z));
-    float3 downRightFront = float3(ceil(c.x), floor(c.y), floor(c.z));
-    float3 downRightBack = float3(ceil(c.x), floor(c.y), ceil(c.z));
-    float3 randUpLeftFront = (random3(upLeftFront));
-    float3 randUpLeftBack = (random3(upLeftBack));
-    float3 randDownLeftFront = (random3(downLeftFront));
-    float3 randDownLeftBack = (random3(downLeftBack));
-    float3 randUpRightFront = (random3(upRightFront));
-    float3 randUpRightBack = (random3(upRightBack));
-    float3 randDownRightFront = (random3(downRightFront));
-    float3 randDownRightBack = (random3(downRightBack));
+    float3 downLeftFloor = float3(floor(c.x), floor(c.y), floor(c.z));
+    float3 downRightFloor = float3(floor(c.x), ceil(c.y), floor(c.z));
+    float3 upLeftFloor = float3(ceil(c.x), floor(c.y), floor(c.z));
+    float3 upRightFloor = float3(ceil(c.x), ceil(c.y), floor(c.z));
+    float3 downLeftCeil = float3(floor(c.x), floor(c.y), ceil(c.z));
+    float3 downRightCeil = float3(floor(c.x), ceil(c.y), ceil(c.z));
+    float3 upLeftCeil = float3(ceil(c.x), floor(c.y), ceil(c.z));
+    float3 upRightCeil = float3(ceil(c.x), ceil(c.y), ceil(c.z));
+
+    float3 randDownLeftFloor = random3(downLeftFloor);
+    float3 randDownRightFloor = random3(downRightFloor);
+    float3 randUpLeftFloor = random3(upLeftFloor);
+    float3 randUpRightFloor = random3(upRightFloor);
+    float3 randDownLeftCeil = random3(downLeftCeil);
+    float3 randDownRightCeil = random3(downRightCeil);
+    float3 randUpLeftCeil = random3(upLeftCeil);
+    float3 randUpRightCeil = random3(upRightCeil);
+
+    float3 disDownLeftFloor =  downLeftFloor - c;
+    float3 disDownRightFloor =  downRightFloor - c;
+    float3 disUpLeftFloor =  upLeftFloor - c;
+    float3 disUpRightFloor =  upRightFloor - c;
+    float3 disDownLeftCeil =  downLeftCeil - c;
+    float3 disDownRightCeil =  downRightCeil - c;
+    float3 disUpLeftCeil =  upLeftCeil - c;
+    float3 disUpRightCeil =  upRightCeil - c;
     
-    float3 disUpLeftFront = upLeftFront - c;
-    float3 disUpLeftBack = upLeftBack - c;
-    float3 disUpRightFront = upRightFront - c;
-    float3 disUpRightBack = upRightBack - c;
-    float3 disDownLeftFront = downLeftFront - c;
-    float3 disDownLeftBack = downLeftBack - c;
-    float3 disDownRightFront = downRightFront - c;
-    float3 disDownRightBack = downRightBack - c;
+    float3 dotDownLeftFloor = dot(disDownLeftFloor, randDownLeftFloor);
+    float3 dotDownRightFloor = dot(disDownRightFloor, randDownRightFloor);
+    float3 dotUpLeftFloor = dot(disUpLeftFloor, randUpLeftFloor);
+    float3 dotUpRightFloor = dot(disUpRightFloor, randUpRightFloor);
+    float3 dotDownLeftCeil = dot(disDownLeftCeil, randDownLeftCeil);
+    float3 dotDownRightCeil = dot(disDownRightCeil, randDownRightCeil);
+    float3 dotUpLeftCeil = dot(disUpLeftCeil, randUpLeftCeil);
+    float3 dotUpRightCeil = dot(disUpRightCeil, randUpRightCeil);
     
-    float3 dotUpLeftFront = dot(randUpLeftFront, disUpLeftFront);
-    float3 dotUpLeftBack = dot(randUpLeftBack, disUpLeftBack);
-    float3 dotUpRightFront = dot(randUpRightFront, disUpRightFront);
-    float3 dotUpRightBack = dot(randUpRightBack, disUpRightBack);
-    float3 dotDownLeftFront = dot(randDownLeftFront, disDownLeftFront);
-    float3 dotDownLeftBack = dot(randDownLeftBack, disDownLeftBack);
-    float3 dotDownRightFront = dot(randDownRightFront, disDownRightFront);
-    float3 dotDownRightBack = dot(randDownRightBack, disDownRightBack);
-    
-    float3 v[8] = {dotDownLeftBack, dotDownRightBack, dotUpLeftBack, dotUpRightBack, dotDownLeftFront,dotDownRightFront,dotUpRightFront,
-     dotUpLeftFront};
+    float3 v[8];
+    v[0] = dotDownLeftFloor;
+    v[2] = dotDownRightFloor;
+    v[1] = dotUpLeftFloor;
+    v[3] = dotUpRightFloor;
+    v[4] = dotDownLeftCeil;
+    v[6] = dotDownRightCeil;
+    v[5] = dotUpLeftCeil;
+    v[7] = dotUpRightCeil;
     float3 fracC = frac(c);
     float randC = triquinticInterpolation(v, fracC);
     return randC;
 }
 
 
-#endif // CG_RANDOM_INCLUDED
+#endif // CG_RANDOM_INCLUDED    
