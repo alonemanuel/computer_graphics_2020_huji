@@ -3,7 +3,7 @@
 void intersectSphere(Ray ray, inout RayHit bestHit, Material material, float4 sphere)
 {
     // Your implementation
-    float currBestHitDistance = 0;
+    float currBestHitDistance=1.#INF;
     
     float3 c = sphere.xyz;      // sphere center
     float r = sphere.w;         // sphere radius
@@ -20,7 +20,7 @@ void intersectSphere(Ray ray, inout RayHit bestHit, Material material, float4 sp
     if (disc < 0) {
         currBestHitDistance = 1.#INF;
     }
-    if (disc = 0) {
+    if (disc == 0) {
         currBestHitDistance = -B / 2*A;
     }
     if (disc > 0) {
@@ -29,7 +29,7 @@ void intersectSphere(Ray ray, inout RayHit bestHit, Material material, float4 sp
         currBestHitDistance = min(t_0, t_1);
     }
     
-    if (currBestHitDistance < bestHit.distance) {
+    if (currBestHitDistance>0 && currBestHitDistance < bestHit.distance) {
         bestHit.material = material;
         bestHit.distance = currBestHitDistance;
         bestHit.position = r_o + (r_d * currBestHitDistance);
@@ -46,7 +46,7 @@ void intersectSphere(Ray ray, inout RayHit bestHit, Material material, float4 sp
 void intersectPlane(Ray ray, inout RayHit bestHit, Material material, float3 c, float3 n)
 {
     // Your implementation
-    float currBestHitDistance = 0;
+    float currBestHitDistance = 1.#INF;
     
     float3 r_o = ray.origin;    // ray origin
     float3 r_d = ray.direction; // ray direction
@@ -60,7 +60,7 @@ void intersectPlane(Ray ray, inout RayHit bestHit, Material material, float3 c, 
         currBestHitDistance = 1.#INF;
     }
     
-    if (currBestHitDistance < bestHit.distance) {
+    if (currBestHitDistance>0 && currBestHitDistance < bestHit.distance) {
         bestHit.material = material;
         bestHit.distance = currBestHitDistance;
         bestHit.position = r_o + (r_d * currBestHitDistance);
