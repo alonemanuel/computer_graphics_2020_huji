@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\school_folders\67629_cg\computer_graphics_2020_huji\ex05_ray_tracing" t="IncludeRecursive">
+      <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
+      <e p="Assets" t="Include">
+        <e p="RayTracer.cs" t="Include" />
+        <e p="RotateAround.cs" t="Include" />
+        <e p="Shaders" t="Include">
+          <e p="Primitives.cginc" t="Include" />
+          <e p="Ray.cginc" t="Include" />
+          <e p="RayTracer.compute" t="Include" />
+          <e p="Scenes.cginc" t="Include" />
+          <e p="Shading.cginc" t="Include" />
+        </e>
+      </e>
+      <e p="ex05_ray_tracing.sln" t="IncludeFlat" />
+      <e p="obj" t="ExcludeRecursive" />
+      <e p="Packages" t="ExcludeRecursive" />
+      <e p="Temp\bin" t="ExcludeRecursive" />
+    </e>
+    <e p="C:\Users\alon\.Rider2019.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\alon\.Rider2019.2\system\resharper-host\local\Transient\ReSharperHost\v192\SolutionCaches\_ex05_ray_tracing.1974523969.00" t="ExcludeRecursive" />
+  </component>
+</project>
