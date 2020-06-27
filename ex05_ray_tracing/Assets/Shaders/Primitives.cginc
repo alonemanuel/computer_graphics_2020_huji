@@ -46,6 +46,26 @@ void intersectSphere(Ray ray, inout RayHit bestHit, Material material, float4 sp
 void intersectPlane(Ray ray, inout RayHit bestHit, Material material, float3 c, float3 n)
 {
     // Your implementation
+    float currBestHitDistance = 0;
+    
+    float3 r_o = ray.origin;    // ray origin
+    float3 r_d = ray.direction; // ray direction
+    
+    float r_d_dot_n = dot(r_d, n);
+    if (r_d_dot_n != 0) {
+        float mone = -dot((r_o - c), n);
+        currBestHitDistance = mone / r_d_dot_n;    
+    }
+    else {
+        currBestHitDistance = 1.#INF;
+    }
+    
+    if (currBestHitDistance < bestHit.distance) {
+        bestHit.material = material;
+        bestHit.distance = currBestHitDistance;
+        bestHit.position = r_o + (r_d * currBestHitDistance);
+        bestHit.normal = n;
+    }    
 }
 
 // Checks for an intersection between a ray and a plane
