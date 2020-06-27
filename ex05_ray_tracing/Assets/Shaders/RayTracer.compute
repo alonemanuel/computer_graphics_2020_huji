@@ -51,15 +51,15 @@ float3 shadeHit(Ray ray, RayHit hit)
     float3 l = normalize(_DirectionalLight.xyz);
     float3 blinnPhongColor = blinnPhong(n, v, l, shininess, albedo);
     
-    float3 shadowRayPos = hit.position + hit.normal*EPS;
-    Ray shadowRay = CreateRay(shadowRayPos, l, ray.energy);
+    float3 shadowRayPos = hit.position + (hit.normal*EPS);
+    Ray shadowRay = CreateRay(shadowRayPos, -l, 1);
     RayHit shadowRayHit = intersectScene(shadowRay);
     float v_p = 0;
     if (isinf(shadowRayHit.distance)) {
         v_p = 1;
     } 
     
-    return blinnPhongColor;
+    return v_p*blinnPhongColor;
 }
 
 // Returns the color associated with the given ray that has missed all geometry
