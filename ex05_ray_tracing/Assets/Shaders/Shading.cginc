@@ -12,12 +12,20 @@ float3 blinnPhong(float3 n, float3 v, float3 l, float shininess, float3 albedo)
 void reflectRay(inout Ray ray, RayHit hit)
 {
     // Your implementation
+    float3 v = -ray.direction;
+    float3 n = hit.normal;
+    float3 r = (2 * dot(v, n) * n) - v;
+    
+    ray.direction = r;
+    ray.origin = hit.position + EPS*n; 
+
+    ray.energy = ray.energy * hit.material.specular;
 }
 
 // Refracts the given ray from the given hit point
 void refractRay(inout Ray ray, RayHit hit)
 {
-    // Your implementation
+    
 }
 
 // Samples the _SkyboxTexture at a given direction vector

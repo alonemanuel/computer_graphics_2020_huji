@@ -59,7 +59,7 @@ float3 shadeHit(Ray ray, RayHit hit)
         v_p = 1;
     } 
     
-    return v_p*blinnPhongColor;
+    return v_p * blinnPhongColor;
 }
 
 // Returns the color associated with the given ray that has missed all geometry
@@ -83,6 +83,7 @@ float3 trace(inout Ray ray)
     }
     else {
         resColor = resColor * shadeHit(ray, bestHit);
+        reflectRay(ray, bestHit);
     }
     return resColor;
 }
@@ -103,6 +104,12 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     // Create a view ray and trace it
     Ray ray = CreateViewRay(uv);
     float3 result = trace(ray);
+    for (int i = 0; i < _BounceLimit; i++) {
+        if (!any(ray.energy)) {
+            break;
+        }
+        result += trace(ray);
+    }
     
     // Set pixel color
     Result[id.xy] = float4(result, 1);

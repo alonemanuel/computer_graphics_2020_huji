@@ -74,6 +74,44 @@ void intersectPlane(Ray ray, inout RayHit bestHit, Material material, float3 c, 
 void intersectPlaneCheckered(Ray ray, inout RayHit bestHit, Material m1, Material m2, float3 c, float3 n)
 {
     // Your implementation
+    float currBestHitDistance = 1.#INF;
+    
+    float3 r_o = ray.origin;    // ray origin
+    float3 r_d = ray.direction; // ray direction
+    
+    float r_d_dot_n = dot(r_d, n);
+    if (r_d_dot_n != 0) {
+        float mone = -dot((r_o - c), n);
+        currBestHitDistance = mone / r_d_dot_n;    
+    }
+    else {
+        currBestHitDistance = 1.#INF;
+        return;
+    }
+    
+    if (currBestHitDistance>0 && currBestHitDistance < bestHit.distance) {
+        bestHit.position = r_o + (r_d * currBestHitDistance);
+        
+        
+        float3 floor_pos = floor(bestHit.position * 2);
+        //float3 fp2 = bestHit.position * 2;
+        //float3 fp2f = float3(floor(fp2.x), floor(fp2.y), floor(fp2.z));
+        float pos_sum = floor_pos.x + floor_pos.y + floor_pos.z;
+        //pos_sum = fp2f.x + fp2f.y + fp2f.z;
+        
+        //float3 fracp = frac(bestHit.position);
+        //float fps = fracp.x + fracp.y + fracp.z;
+        //bool is_even = fps >= 1 && fps < 2;
+    
+        if (pos_sum % 2.0 == 0.0) {
+            bestHit.material = m1;
+        }
+        else {
+            bestHit.material = m2;
+        }
+        bestHit.distance = currBestHitDistance;
+        bestHit.normal = n;
+    } 
 }
 
 
@@ -82,4 +120,44 @@ void intersectPlaneCheckered(Ray ray, inout RayHit bestHit, Material m1, Materia
 void intersectTriangle(Ray ray, inout RayHit bestHit, Material material, float3 a, float3 b, float3 c)
 {
     // Your implementation
+    float3 ac = a - c;
+    float3 bc = b - c;
+    float3 n_triangle = normalize(cross(ac, bc)); 
+    float3 r_o = ray.origin;    // ray origin
+    float3 r_d = ray.direction; // ray direction
+    float r_d_dot_n = dot(r_d, n_triangle);
+    float p_dist = 1.#INF;
+    
+    // check if point is on triangle plane 
+    
+    if (r_d_dot_n != 0) {
+        float mone = -dot((r_o - c), n_triangle);
+        p_dist = mone / r_d_dot_n;          
+    }
+    else {
+       return; 
+    }
+    
+    // assuming point is on plane, check if in triangle
+    float3 p = r_o + (r_d * p_dist);
+    
+    float3 ba = b - a;
+    float3 cb = c - b;
+    float3 pa = p - a;
+    float3 pb = p - b;
+    float3 pc = p - c;
+    float check_a = dot(cross(ba, pa), n_triangle);
+    float check_b = dot(cross(cb, pb), n_triangle);
+    float check_c = dot(cross(ac, pc), n_triangle);
+    
+    
+    if (check_a >= 0 && check_b >= 0 && check_c >= 0) {
+        if (p_dist < bestHit.distance && p_dist > 0 ){
+            bestHit.material = material;
+            bestHit.distance = p_dist;
+            bestHit.position = p;
+            bestHit.normal = n_triangle;
+            return;
+        }
+    }
 }
