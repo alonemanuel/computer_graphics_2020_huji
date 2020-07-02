@@ -91,18 +91,20 @@ void intersectPlaneCheckered(Ray ray, inout RayHit bestHit, Material m1, Materia
     
     if (currBestHitDistance>0 && currBestHitDistance < bestHit.distance) {
         bestHit.position = r_o + (r_d * currBestHitDistance);
-        
-        
         float3 floor_pos = floor(bestHit.position * 2);
-        //float3 fp2 = bestHit.position * 2;
-        //float3 fp2f = float3(floor(fp2.x), floor(fp2.y), floor(fp2.z));
-        float pos_sum = floor_pos.x + floor_pos.z;
-        //pos_sum = fp2f.x + fp2f.y + fp2f.z;
-        
-        //float3 fracp = frac(bestHit.position);
-        //float fps = fracp.x + fracp.y + fracp.z;
-        //bool is_even = fps >= 1 && fps < 2;
-    
+        float pos_sum;
+        if ( n.x == 1)
+        {
+            pos_sum = floor_pos.y + floor_pos.z;   
+        }
+        if ( n.y == 1)
+        {
+            pos_sum = floor_pos.x + floor_pos.z; 
+        }
+        if (n.z == 1)
+        {
+            pos_sum = floor_pos.x + floor_pos.y; 
+        }          
         if (pos_sum % 2.0 == 0.0) {
             bestHit.material = m1;
         }
