@@ -83,7 +83,14 @@ float3 trace(inout Ray ray)
     }
     else {
         resColor = resColor * shadeHit(ray, bestHit);
-        reflectRay(ray, bestHit);
+        if (bestHit.material.refractiveIndex == -1)
+        {
+            reflectRay(ray, bestHit);        
+        }
+        else
+        {
+            refractRay(ray, bestHit);
+        }
     }
     return resColor;
 }
